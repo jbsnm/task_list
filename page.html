@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task List</title>
+  <h1>Task List</h1>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+
+    #task-list li {
+      background-color: #bdbdbd6f;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #add-task-form {
+      margin-bottom: 30px;
+    }
+
+    #new-task {
+      padding: 12px;
+      width: calc(100% - 88px);
+      font-size: 16px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: blue;
+      color: white;
+      
+    }
+
+    button.change-status-btn.pendiente {
+      background-color: blue;
+      color: #fff;
+      float:right
+    }
+
+    button.change-status-btn.completada {
+      background-color: green;
+      color: #fff;
+    }
+
+    button.delete-btn {
+      background-color: #a8112a;
+      color: #fff;
+      float: right
+    }
+    
+       
+  </style>
+</head>
+<body>
+  <form id="add-task-form">
+    <input type="text" id="new-task" placeholder="Escribe una nueva tarea">
+    <button type="submit">Agregar nueva tarea</button>
+  </form>
+
+  <ul id="task-list"></ul>
+
+  <script>
+    const taskList = document.getElementById('task-list');
+    const form = document.getElementById('add-task-form');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newTask = document.getElementById('new-task').value.trim();
+      if (!newTask) return;
+      addTask(newTask);
+      document.getElementById('new-task').value = '';
+    });
+
+    function addTask(taskText) {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = taskText;
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Eliminar';
+      deleteBtn.classList.add('delete-btn');
+      const changeStatusBtn = document.createElement('button');
+      changeStatusBtn.textContent = 'Pendiente';
+      changeStatusBtn.classList.add('change-status-btn', 'pendiente');
+      
+      li.appendChild(span);
+      li.appendChild(deleteBtn);
+      li.appendChild(changeStatusBtn);
+
+      taskList.appendChild(li);
+      updateLocalStorage();
+    }
+
+    taskList.addEventListener('click', (e) => {
+      const li = e.target.parentElement;
+      if (e.target.classList.contains('delete-btn')) {
+        taskList.removeChild(li);
+        updateLocalStorage();
+      } else if (e.target.classList.contains('change-status-btn')) {
+        const btn = e.target;
+        const status = btn.textContent.trim();
+        btn.textContent = status === 'Pendiente' ? 'Completada' : 'Pendiente';
+        updateLocalStorage();
+      }
+    });
+
+    function updateLocalStorage() {
+      const tasks = [];
+      taskList.querySelectorAll('li').forEach((task) => {
+        tasks.push({
+          text: task.querySelector('span').textContent,
+          completed: task.classList.contains('completed')
+        });
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.forEach((task) => addTask(task.text));
+  </script>
+</body>
+</html>
